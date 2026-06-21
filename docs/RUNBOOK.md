@@ -10,10 +10,13 @@
    docker compose -f infra/docker-compose.yml up -d
    docker compose -f infra/docker-compose.yml ps   # wait for all healthy
    ```
-2. **Create lakehouse buckets**
+2. **Create lakehouse buckets** (attach the `mc` client to the compose network —
+   macOS Docker Desktop has no usable host networking)
    ```bash
-   docker run --rm --network host -v "$PWD/infra/minio:/s" \
-     --entrypoint bash minio/mc /s/init-buckets.sh
+   NET=$(docker network ls --format '{{.Name}}' | grep -i infra | head -1)
+   docker run --rm --network "$NET" --entrypoint sh minio/mc -c \
+     "mc alias set local http://minio:9000 minioadmin minioadmin && \
+      mc mb -p local/lakehouse local/warehouse"
    ```
 3. **Create the Postgres alert table**
    ```bash
@@ -45,6 +48,13 @@
    - Fraud alerts: `psql -U otp -d otp -c "SELECT severity, count(*) FROM fraud_alerts GROUP BY 1;"`
    - Marts in Trino: `SELECT * FROM iceberg.gold.ait_loss ORDER BY estimated_ait_loss_usd DESC;`
    - Kafka UI: http://localhost:8085 · MinIO console: http://localhost:9001 · Trino: http://localhost:8080
+
+## Verification scripts
+- `PYTHONPATH=. python scripts/verify_iceberg_local.py` — Docker-free check of the
+  Spark + Iceberg + batch + streaming logic (local-filesystem catalog).
+- `PYTHONPATH=. python scripts/verify_cluster.py` — bounded live end-to-end check
+  against the running stack: Kafka → Spark → Iceberg-on-MinIO → Postgres → Trino.
+  Requires the stack up and buckets created (steps 1–2).
 
 ## Teardown
 ```bash

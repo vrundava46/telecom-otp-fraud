@@ -20,8 +20,10 @@ cleanly onto petabyte-scale production. This document is the bridge.
   Partition pruning + predicate pushdown on Iceberg keeps scans bounded.
 
 ## Iceberg (lakehouse tables)
-- **Local:** hadoop catalog on MinIO.
-- **Production:** REST or Glue catalog. Partition Bronze/Silver by
+- **Local:** Iceberg **REST catalog** (`tabulario/iceberg-rest`) over MinIO, so Spark
+  and Trino share the same tables (a hadoop/filesystem catalog is Spark-only and is
+  not readable by Trino).
+- **Production:** managed REST, Glue, or Nessie catalog. Partition Bronze/Silver by
   `days(event_ts)` and `bucket(N, enterprise_id)`. Schedule maintenance:
   `rewrite_data_files` (compaction) to fight small-file growth from streaming,
   `expire_snapshots` and `remove_orphan_files` for retention/cost. Iceberg metadata
