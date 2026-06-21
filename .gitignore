@@ -8,3 +8,7 @@ warehouse/
 spark-warehouse/
 *.log
 .DS_Store
+dbt/dbt_packages/
+dbt/target/
+dbt/logs/
+dbt/.user.yml
