@@ -1,0 +1,8 @@
+name: otp_gold
+version: "1.0"
+profile: otp
+model-paths: ["models"]
+models:
+  otp_gold:
+    gold:
+      +materialized: table

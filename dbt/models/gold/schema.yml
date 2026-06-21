@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: delivery_funnel
+    columns:
+      - name: enterprise_id
+        tests: [not_null]
+      - name: verify_rate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+  - name: latency_pct
+    columns:
+      - name: mcc
+        tests: [not_null]
+  - name: ait_loss
+    columns:
+      - name: estimated_ait_loss_usd
+        tests: [not_null]
